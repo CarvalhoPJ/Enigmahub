@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Enigmas</title>
+    <style>
+        .tip {
+            display: none;
+        }
+    </style>
+    <script>
+        function toggleTip(enigmaId) {
+            var tipElement = document.getElementById('tip_' + enigmaId);
+            var buttonElement = document.getElementById('button_tip_' + enigmaId);
+            
+            if (tipElement.style.display === "none") {
+                tipElement.style.display = "block";
+                buttonElement.style.display = "Esconder Tip";
+            } else {
+                tipElement.style.display = "none"; 
+                buttonElement.style.display = "Mostrar Tip";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Lista de Enigmas</h1>
+    <ul>
+        {% for enigma in enigmas %}
+            <li>
+                <strong>Título:</strong> {{ enigma.title }}<br>
+                <strong>Descrição:</strong> {{ enigma.description }}<br>
+                <strong>Respostas Totais:</strong> {{ enigma.answers}}<br>
+                <strong>Resolvido:</strong> {{ enigma.resolved|yesno:"Sim,Não" }}<br>
+            
+                <button id="button_Tip_{{ enigma.id }}" onclick="toggleTip({{ enigma.id }})">Mostrar Dica</button>
+                <div id="tip_{{ enigma.id }}" class="tip">
+                    <strong>Dica:</strong> {{ enigma.tips|default:"Nenhuma dica" }}<br>
+                </div>
+            
+                {% if enigma.resolved %}
+                    <p><strong>Este enigma já foi resolvido. Não é possível responder novamente.</strong></p>
+                {% else %}
+                    <form method="post" action="{% url 'enigmas' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="enigma_id" value="{{ enigma.id }}">
+                        <label for="answer_{{ enigma.id }}">Sua Resposta:</label>
+                        <input type="text" name="answer" id="answer_{{ enigma.id }}" required>
+                        <button type="submit">Enviar Resposta</button>
+                    </form>
+                {% endif %}
+
+                {% if resultados.enigma_id == enigma.id %}
+                    <p><strong>Resultado:</strong> {{ result.enigma_id }}</p>
+                {% endif %}
+            
+            </li>
+        {% empty %}
+            <li>Nenhum enigma encontrado.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'home' %}">Voltar para a Home</a>
+</body>
+</html>
