@@ -26,33 +26,38 @@
 <body>
     <h1>Lista de Enigmas</h1>
     <ul>
-        {% for enigma in enigmas %}
+        {% for enigma_obj in enigmas_com_tentativas %}
             <li>
-                <strong>Título:</strong> {{ enigma.title }}<br>
-                <strong>Descrição:</strong> {{ enigma.description }}<br>
-                <strong>Respostas Totais:</strong> {{ enigma.answers}}<br>
-                <strong>Resolvido:</strong> {{ enigma.resolved|yesno:"Sim,Não" }}<br>
-            
-                <button id="button_Tip_{{ enigma.id }}" onclick="toggleTip({{ enigma.id }})">Mostrar Dica</button>
-                <div id="tip_{{ enigma.id }}" class="tip">
-                    <strong>Dica:</strong> {{ enigma.tips|default:"Nenhuma dica" }}<br>
-                </div>
-            
-                {% if enigma.resolved %}
-                    <p><strong>Este enigma já foi resolvido. Não é possível responder novamente.</strong></p>
+                <strong>Título:</strong> {{ enigma_obj.enigma.title }}<br>
+                <strong>Descrição:</strong> {{ enigma_obj.enigma.description }}<br>
+
+                {% if enigma_obj.tentativa %}
+                    <strong>Resolvido:</strong> {{  enigma_obj.tentativa.esta_correto|yesno:"Sim,Não" }}<br>
+                    <strong>Número de Tentativas:</strong> {{ enigma_obj.tentativa.numero_tentativas}}<br>
                 {% else %}
+                    <strong>Resolvido:</strong> Não<br>
+                    <strong>Número de Tentativas:</strong> Nenhuma tentativa<br>
+                {% endif %}
+            
+                {% if enigma_obj.tentativa and enigma_obj.tentativa.esta_correto %}
+                    <p><strong>Você já resolveu esse enigma!</strong></p>
+                {% else %}
+                <button id="button_Tip_{{ enigma_obj.enigma.id }}" onclick="toggleTip({{ enigma_obj.enigma.id }})">Mostrar Dica</button>
+                    <div id="tip_{{ enigma_obj.enigma.id }}" class="tip">
+                        <strong>Dica:</strong> {{ enigma_obj.enigma.tips|default:"Nenhuma dica" }}<br>
+                    </div>
+
                     <form method="post" action="{% url 'enigmas' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="enigma_id" value="{{ enigma.id }}">
-                        <label for="answer_{{ enigma.id }}">Sua Resposta:</label>
-                        <input type="text" name="answer" id="answer_{{ enigma.id }}" required>
+                        <input type="hidden" name="enigma_id" value="{{ enigma_obj.enigma.id }}">
+                        <label for="answer_{{ enigma_obj.enigma.id }}">Sua Resposta:</label>
+                        <input type="text" name="answer" id="answer_{{ enigma_obj.enigma.id }}" required>
                         <button type="submit">Enviar Resposta</button>
                     </form>
+                        <p><strong>Resultado:</strong> {{ enigma_obj.tentativa.resultado }}</p>
                 {% endif %}
 
-                {% if resultados.enigma_id == enigma.id %}
-                    <p><strong>Resultado:</strong> {{ result.enigma_id }}</p>
-                {% endif %}
+
             
             </li>
         {% empty %}
@@ -60,5 +65,6 @@
         {% endfor %}
     </ul>
     <a href="{% url 'home' %}">Voltar para a Home</a>
+
 </body>
 </html>
